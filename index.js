@@ -74,6 +74,15 @@ app.put('/mentor', async (req, res) => {
     }
 });
 
+app.post('/resetPassword', async (req, res) => {
+    console.log(req.body.email)
+    const email = req.body.email;
+    const userData = await user.findOne({ email: email })
+
+    if (!userData)
+        res.send(userEmail)
+
+})
 
 // user save by put method
 // app.put('/user/:email', async (req, res) => {
