@@ -10,11 +10,9 @@ mongoose.set('strictQuery', true);
 
 const user = require('./models/userModels')
 // const checkAuth = require('./db/middleware/CheckAuth')
-
-
 const userRouter = require("./routes/userRouter")
-
 const careerRouter = require("./routes/careerRouter")
+const nodemailer = require("nodemailer")
 
 
 
@@ -74,14 +72,68 @@ app.put('/mentor', async (req, res) => {
     }
 });
 
+const sendEMail = async (email, token) => {
+    console.log(email)
+    const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+            user: process.env.Email, // generated ethereal user
+            pass: process.env.GmailAppPassword, // generated ethereal password
+        },
+    });
+
+    const mailOptions = ({
+        from: process.env.Email,
+        to: email,
+        subject: "reset your Password",
+
+        html: `<a href="http://localhost:5000/resetPassword?token=${token}">click here </a> <p> to reset your password </p>`, // html body
+    });
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error)
+        } else {
+            console.log('Email sent: ' + info.response);
+        }
+    })
+
+}
+
+
 app.post('/resetPassword', async (req, res) => {
-    console.log(req.body.email)
+
     const email = req.body.email;
     const userData = await user.findOne({ email: email })
+    const password = userData?.password
 
-    if (!userData)
-        res.send(userEmail)
+    if (!userData) {
+        return res.status(400).send('user not found')
 
+    }
+    else {
+        const token = jwt.sign({ password }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" })
+        const updatedUser = await user.updateOne({ email: email }, { $set: { token: token } })
+
+        sendEMail(userData.email, token)
+        res.send({ message: "please check your Email and reset your password" })
+
+    }
+
+})
+
+app.get('/resetPassword', async (req, res) => {
+    const token = req.query.token;
+    const password = req.body.password
+    const UserData = await user.findOne({ token: token });
+    if (!UserData) {
+        res.status(400).send('invalid token')
+    } else if (UserData) {
+        const updatedUserData = await user.findOneAndUpdate({ email: UserData.email }, { $set: { password: password, token: "" } }, { new: true })
+        res.send(updatedUserData)
+    }
+    console.log(token)
 })
 
 // user save by put method
