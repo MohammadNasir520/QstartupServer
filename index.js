@@ -8,21 +8,21 @@ require("dotenv").config()
 mongoose.set('strictQuery', true);
 
 
-// const user = require('./db/model/user')
+const user = require('./models/userModels')
 // const checkAuth = require('./db/middleware/CheckAuth')
 
 
 const userRouter = require("./routes/userRouter")
-const creatorsRouter = require("./routes/creatorsRouter")
-const donationRouter = require("./routes/donationRoutes")
+
+const careerRouter = require("./routes/careerRouter")
+
 
 
 app.use(cors());
 app.use(express.json())
 
-app.use(creatorsRouter)
 app.use(userRouter)
-app.use(donationRouter)
+app.use(careerRouter)
 
 // database connection
 const database = module.exports = () => {
@@ -44,7 +44,51 @@ const database = module.exports = () => {
 }
 database()
 
+app.put('/mentor', async (req, res) => {
+    const email = req.body.email;
+    const role = req.body.role;
+    const username = req.body.username;
+    console.log(req.body)
+    console.log(role)
 
+    try {
+
+        await user.findOneAndUpdate(
+            { email },
+
+            {
+                $set: {
+                    role: role,
+                    username: username,
+                    data: req.body
+                }
+            },
+            { upsert: true }
+        );
+        res.json('updated');
+
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err);
+    }
+});
+
+
+// user save by put method
+// app.put('/user/:email', async (req, res) => {
+//     const email = req.params.email;
+
+//     const user = req.body;
+//     const filter = { email: email }
+//     const options = { upsert: true }
+//     const updateDoc = {
+//         $set: user
+//     }
+//     const result = await usersCollection.updateOne(filter, updateDoc, options)
+
+//     res.send({ result, token })
+// })
 
 
 
