@@ -5,6 +5,7 @@ const mongoose = require('mongoose')
 const port = process.env.PORT || 5000;
 const jwt = require('jsonwebtoken')
 require("dotenv").config()
+
 mongoose.set('strictQuery', true);
 
 
@@ -14,7 +15,12 @@ const userRouter = require("./routes/userRouter")
 const careerRouter = require("./routes/careerRouter")
 const nodemailer = require("nodemailer")
 
+// ejs setup
+const ejs = require('ejs');
+app.set('view engine', 'ejs');
 
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cors());
 app.use(express.json())
@@ -89,7 +95,7 @@ const sendEMail = async (email, token) => {
         to: email,
         subject: "reset your Password",
 
-        html: `<a href="http://localhost:5000/resetPassword?token=${token}">click here </a> <p> to reset your password </p>`, // html body
+        html: `<a href="http://localhost:5000/resetPasswordForm?token=${token}">click here </a> <p> to reset your password </p>`, // html body
     });
     transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
@@ -123,33 +129,41 @@ app.post('/resetPassword', async (req, res) => {
 
 })
 
-app.get('/resetPassword', async (req, res) => {
+app.post('/resetPasswordFinal', async (req, res) => {
+    const token = req.query.token;
+    const password = req.body.password
+    if (!password) {
+        console.log('password not get')
+    }
+    console.log('password', password)
+    console.log('token', token)
+    const UserData = await user.findOne({ token: token });
+    if (!UserData) {
+        res.status(400).send('invalid token')
+    } else if (UserData) {
+        const updatedUserData = await user.findOneAndUpdate({ email: UserData.email }, { $set: { password: password, token: "" } }, { new: true })
+        // res.send(updatedUserData)
+        if (updatedUserData) {
+            res.send("password reset successfully")
+        }
+    }
+    console.log(token)
+})
+app.get('/resetPasswordForm', async (req, res) => {
     const token = req.query.token;
     const password = req.body.password
     const UserData = await user.findOne({ token: token });
     if (!UserData) {
         res.status(400).send('invalid token')
     } else if (UserData) {
-        const updatedUserData = await user.findOneAndUpdate({ email: UserData.email }, { $set: { password: password, token: "" } }, { new: true })
-        res.send(updatedUserData)
+
+        // res.send(updatedUserData)
+        res.render('resetPasswordForm', { token })
     }
-    console.log(token)
+
 })
 
-// user save by put method
-// app.put('/user/:email', async (req, res) => {
-//     const email = req.params.email;
 
-//     const user = req.body;
-//     const filter = { email: email }
-//     const options = { upsert: true }
-//     const updateDoc = {
-//         $set: user
-//     }
-//     const result = await usersCollection.updateOne(filter, updateDoc, options)
-
-//     res.send({ result, token })
-// })
 
 
 
