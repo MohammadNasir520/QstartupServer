@@ -1,50 +1,106 @@
+
+
 const user = require("../models/userModels")
 const jwt = require("jsonwebtoken")
 
 
+
+// sign up api by email
 exports.signUp = async (req, res) => {
     console.log(req.body)
-    const { username, email } = req.body;
-    console.log(username, email)
 
-    try {
-        // Find the existing document with the given email address
-        const existingUser = await user.findOne({ email });
+    // destructuring sign up field
+    const { username, email, password, confirmpassword } = req.body;
 
-        if (existingUser) {
-            // If the document exists, update its fields
-            existingUser.username = username;
-            await existingUser.save();
+    // find user from users collection of the database
+    const existingUser = await user.findOne({ email: email })
+    console.log(existingUser)
 
-            res.json("updated and signUp  successful ");
-        } else if (!existingUser) {
-            // If the document doesn't exist, create a new one
-            await user.create({ username, email });
-            res.json('user creation and signup successful')
-        }
 
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Update failed");
+
+    // custom validation
+    if (email === "" || email === undefined || !email) {
+        return res.status(404).send({ message: 'email  should not be empty' })
     }
+
+    if (username === "" || username === undefined || !username) {
+        return res.status(404).send({ message: 'username should not be empty' })
+    }
+    if (password === "" || confirmpassword === "" || !password || !confirmpassword) {
+        return res.status(404).send({ message: 'password or confirmpassword should not be empty' })
+    }
+    else if (password !== confirmpassword) {
+        return res.status(404).send({ message: 'password and confirm password did not match' })
+    }
+    else if (password.length < 6 || confirmpassword.length < 6) {
+        return res.status(404).send({ message: 'password must be at least 6 character' })
+    }
+
+    if (existingUser?.email === email) {
+        return res.status(400).send({ message: 'email already exist' })
+    }
+
+    // delete confirm password from saving in database
+    delete req.body.confirmpassword;
+
+
+    // creating user and save to database
+    let newUser = new user(req.body);
+    let result = await newUser.save()
+    console.log(result)
+
+    // saved user transfer to object for sending the response and delete password to send respond for sucurity purpose
+    result = result.toObject();
+    delete result.password;
+
+    // creating jwt token 
+    const token = jwt.sign(
+        {
+            username: result.username,
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: "1h"
+        }
+    )
+
+    // sending response to client site
+    res.send({ ...result, token, message: "signup successful" })
+
+
 }
+// ______________________________________signUp API end_________________________________________________________
 
 
 
 
+// ______________________________________login API start______________________________________________
 
-
-
-
+// log in api controller by email
 exports.login = async (req, res) => {
 
-    let result = await user.findOne({ username: req.body.username })
+    // destructuring login field value
+    const { email, password } = req.body;
+
+    //  custom validation of email
+    if (email === "" || email === undefined || !email) {
+        return res.status(404).send({ message: 'email  should not be empty' })
+    }
+
+
+    // user find from saved data base
+    let result = await user.findOne({ email: email })
     if (!result) {
         return res.status(404).send('user does not exist')
     }
-    else if (result.password !== req.body.password) {
-        return res.status(404).send('password does not matched')
+
+    // validation of saved password and users input password
+    else if (result.password !== password) {
+        return res.status(404).json('incorrect password')
     }
+
+
+    // jwt token create
     const token = jwt.sign(
         {
             username: result.username,
@@ -55,7 +111,83 @@ exports.login = async (req, res) => {
         }
     )
     console.log(result)
+
+    // saved user transfer to object for sending the response and delete password, _id to send respond for sucurity purpose
     result = result.toObject()
     delete result.password
-    res.send({ result, token })
+    delete result._id
+
+    // sending the response
+    res.send({ ...result, token })
 }
+// ______________________________________login API End______________________________________________
+
+
+
+
+
+
+
+// const user = require("../models/userModels")
+// const jwt = require("jsonwebtoken")
+
+
+// exports.signUp = async (req, res) => {
+
+
+//     console.log(req.body)
+//     const { username, email } = req.body;
+//     console.log(username, email)
+
+//     try {
+//         // Find the existing document with the given email address
+//         const existingUser = await user.findOne({ email });
+
+//         if (existingUser) {
+//             // If the document exists, update its fields
+//             existingUser.username = username;
+//             await existingUser.save();
+
+//             res.json("updated and signUp  successful ");
+//         } else if (!existingUser) {
+//             // If the document doesn't exist, create a new one
+//             await user.create({ username, email });
+//             res.json('user creation and signup successful')
+//         }
+
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send("Update failed");
+//     }
+// }
+
+
+
+
+
+
+
+
+// exports.login = async (req, res) => {
+
+//     let result = await user.findOne({ username: req.body.username })
+//     if (!result) {
+//         return res.status(404).send('user does not exist')
+//     }
+//     else if (result.password !== req.body.password) {
+//         return res.status(404).send('password does not matched')
+//     }
+//     const token = jwt.sign(
+//         {
+//             username: result.username,
+//         },
+//         process.env.ACCESS_TOKEN_SECRET,
+//         {
+//             expiresIn: "1h"
+//         }
+//     )
+//     console.log(result)
+//     result = result.toObject()
+//     delete result.password
+//     res.send({ result, token })
+// }

@@ -48,6 +48,7 @@ const database = module.exports = () => {
 }
 database()
 
+// puting the data of mentor and startup
 app.put('/mentor', async (req, res) => {
     const email = req.body.email;
     const role = req.body.role;
@@ -78,6 +79,7 @@ app.put('/mentor', async (req, res) => {
     }
 });
 
+//  send mail function
 const sendEMail = async (email, token) => {
     console.log(email)
     const transporter = nodemailer.createTransport({
@@ -108,7 +110,8 @@ const sendEMail = async (email, token) => {
 }
 
 
-app.post('/resetPassword', async (req, res) => {
+// send link and add token to the users document 
+app.post('/sendResetLinkEmail', async (req, res) => {
 
     const email = req.body.email;
     const userData = await user.findOne({ email: email })
@@ -129,7 +132,21 @@ app.post('/resetPassword', async (req, res) => {
 
 })
 
-app.post('/resetPasswordFinal', async (req, res) => {
+// rendering the user reset form after clicking the inboxed link
+app.get('/resetPasswordForm', async (req, res) => {
+    const token = req.query.token;
+    const UserData = await user.findOne({ token: token });
+    if (!UserData) {
+        res.status(400).send('invalid token')
+    } else if (UserData) {
+
+        res.render('resetPasswordForm', { token })
+    }
+
+})
+
+// finally calling the reset passord set the password and update the token as empty
+app.post('/resetPassword', async (req, res) => {
     const token = req.query.token;
     const password = req.body.password
     if (!password) {
@@ -145,23 +162,12 @@ app.post('/resetPasswordFinal', async (req, res) => {
         // res.send(updatedUserData)
         if (updatedUserData) {
             res.send("password reset successfully")
+
         }
     }
     console.log(token)
 })
-app.get('/resetPasswordForm', async (req, res) => {
-    const token = req.query.token;
-    const password = req.body.password
-    const UserData = await user.findOne({ token: token });
-    if (!UserData) {
-        res.status(400).send('invalid token')
-    } else if (UserData) {
 
-        // res.send(updatedUserData)
-        res.render('resetPasswordForm', { token })
-    }
-
-})
 
 
 
