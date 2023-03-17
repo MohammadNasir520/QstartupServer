@@ -5,18 +5,27 @@ const router = express.Router()
 const user = require('../models/userModels')
 
 router.get("/admin/getAllStartUp", async (req, res) => {
-    console.log('startUp route hit')
-    const startUpId = req.query.startUpId;
-    let query = {
-        role: 'startUp'
-    }
-    if (startUpId) {
-        query = {
-            role: 'startUp',
-            _id: new ObjectId(startUpId)
+    try {
+        console.log('startUp route hit')
+        const startUpId = req.query.startUpId;
+        let query = {
+            role: 'startUp'
         }
+        if (startUpId) {
+            query = {
+                role: 'startUp',
+                _id: new ObjectId(startUpId)
+            }
+        }
+        const allUser = await user.find(query)
+        if (allUser) {
+
+            res.json(allUser)
+        } else {
+            res.json('startUp did not found')
+        }
+    } catch (error) {
+        console.log(error)
     }
-    const allUser = await user.find(query)
-    res.json(allUser)
 })
 module.exports = router;
