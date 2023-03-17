@@ -80,8 +80,8 @@ app.put('/mentor', async (req, res) => {
 });
 
 //  send mail function
-const sendEMail = async (email, token) => {
-    console.log(email)
+const sendEMail = async (fromEmail, toEmail, subject, html) => {
+
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
@@ -93,11 +93,11 @@ const sendEMail = async (email, token) => {
     });
 
     const mailOptions = ({
-        from: process.env.Email,
-        to: email,
-        subject: "reset your Password",
+        from: 'mdnasiruddin5201@gmail.com',
+        to: toEmail,
+        subject: subject,
 
-        html: `<a href="http://localhost:5000/resetPasswordForm?token=${token}">click here </a> <p> to reset your password </p>`, // html body
+        html: html,
     });
     transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
@@ -110,6 +110,9 @@ const sendEMail = async (email, token) => {
 }
 
 
+
+
+
 // send link and add token to the users document 
 app.post('/sendResetLinkEmail', async (req, res) => {
 
@@ -118,14 +121,18 @@ app.post('/sendResetLinkEmail', async (req, res) => {
     const password = userData?.password
 
     if (!userData) {
-        return res.status(400).send('user not found')
+        return res.status(400).json('user not found')
 
     }
     else {
         const token = jwt.sign({ password }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" })
         const updatedUser = await user.updateOne({ email: email }, { $set: { token: token } })
 
-        sendEMail(userData.email, token)
+        const subject = "reset your Password"
+        const from = process.env.Email
+        const html = `<a href="http://localhost:5000/resetPasswordForm?token=${token}">click here </a> <p> to reset your password </p>`
+
+        sendEMail(from, userData.email, subject, html)
         res.send({ message: "please check your Email and reset your password" })
 
     }
@@ -170,7 +177,14 @@ app.post('/resetPassword', async (req, res) => {
 
 
 
+app.post('/contact', async (req, res) => {
+    console.log(req.body)
+    const { email, message, subject } = req.body;
 
+    const toEmail = 'nasirahsan520@gmail.com';
+    const html = `<p>${message + email} </p>`
+    sendEMail(fromEmail = email, toEmail, subject, html)
+})
 
 
 
