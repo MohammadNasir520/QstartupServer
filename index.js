@@ -93,7 +93,7 @@ const sendEMail = async (fromEmail, toEmail, subject, html) => {
     });
 
     const mailOptions = ({
-        from: 'mdnasiruddin5201@gmail.com',
+        from: fromEmail,
         to: toEmail,
         subject: subject,
 
