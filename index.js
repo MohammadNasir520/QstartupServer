@@ -21,6 +21,7 @@ const ejs = require('ejs');
 app.set('view engine', 'ejs');
 
 const bodyParser = require('body-parser');
+const { ObjectId } = require('mongodb');
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // middleware 
@@ -189,6 +190,13 @@ app.post('/contact', async (req, res) => {
     sendEMail(fromEmail = email, toEmail, subject, html)
 })
 
+app.delete('/userDelete/:id', async (req, res) => {
+
+    const id = req.params.id
+    const deletedUser = await user.findOneAndDelete({ _id: new ObjectId(id) })
+    console.log(id)
+    res.json(deletedUser)
+})
 
 
 
