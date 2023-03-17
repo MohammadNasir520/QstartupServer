@@ -1,7 +1,8 @@
-const mongoose = require("mongoose")
-const router = mongoose.Router()
+const express = require("express")
+const router = express.Router()
 
-router.get("/startUp/getAllStartUp", async (req, res) => {
+router.get("/admin/getAllStartUp", async (req, res) => {
     console.log('startUp route hit')
     res.json('startup route hit')
 })
+module.exports = router;

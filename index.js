@@ -5,6 +5,7 @@ const mongoose = require('mongoose')
 const port = process.env.PORT || 5000;
 const jwt = require('jsonwebtoken')
 require("dotenv").config()
+const nodemailer = require("nodemailer")
 
 mongoose.set('strictQuery', true);
 
@@ -13,7 +14,7 @@ const user = require('./models/userModels')
 // const checkAuth = require('./db/middleware/CheckAuth')
 const userRouter = require("./routes/userRouter")
 const careerRouter = require("./routes/careerRouter")
-const nodemailer = require("nodemailer")
+const startUpRouter = require("./routes/startupRouter")
 
 // ejs setup
 const ejs = require('ejs');
@@ -22,11 +23,13 @@ app.set('view engine', 'ejs');
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// middleware 
 app.use(cors());
 app.use(express.json())
 
 app.use(userRouter)
 app.use(careerRouter)
+app.use(startUpRouter)
 
 // database connection
 const database = module.exports = () => {
