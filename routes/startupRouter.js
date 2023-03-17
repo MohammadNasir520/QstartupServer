@@ -7,14 +7,15 @@ const user = require('../models/userModels')
 router.get("/admin/getAllStartUp", async (req, res) => {
     try {
         console.log('startUp route hit')
-        const startUpId = req.query.startUpId;
+        const _id = req.query._id;
+        const role = req.query.role;
         let query = {
-            role: 'startUp'
+            role: role
         }
-        if (startUpId) {
+        if (_id && role) {
             query = {
-                role: 'startUp',
-                _id: new ObjectId(startUpId)
+                role: role,
+                _id: new ObjectId(_id)
             }
         }
         const allUser = await user.find(query)
