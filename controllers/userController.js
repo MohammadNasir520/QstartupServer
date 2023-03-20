@@ -1,7 +1,8 @@
 
 
 const user = require("../models/userModels")
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
+const { ObjectId } = require("mongodb");
 
 
 
@@ -125,7 +126,34 @@ exports.login = async (req, res) => {
 
 
 
+//   get all users 
+exports.getAllUser = async (req, res) => {
+    const id = req.query.id
+    console.log(id)
+    let query = {}
+    if (id) {
+        query = {
+            _id: new ObjectId(id)
+        }
+    }
 
+    const users = await user.find(query)
+
+    if (users) {
+        console.log(id)
+        res.json(users)
+    } else {
+        res.json({ message: 'user not found' })
+    }
+
+    // try {
+    //     const users = await user.find()
+    //     res.send(users)
+    // } catch (error) {
+    //     console.log(error)
+
+    // }
+}
 
 
 // const user = require("../models/userModels")
