@@ -53,8 +53,16 @@ const database = module.exports = () => {
 database()
 
 // puting the data of mentor and startup
-app.put('/mentor', async (req, res) => {
-    const email = req.body.email;
+app.put('/registration', async (req, res) => {
+    let email = '';
+    if (req.body.email_StartUp) {
+
+        email = req.body.email_StartUp;
+    }
+    if (req.body.email_Mentor) {
+
+        email = req.body.email_Mentor;
+    }
     const role = req.body.role;
     const username = req.body.username;
     console.log(req.body)
@@ -67,6 +75,7 @@ app.put('/mentor', async (req, res) => {
 
             {
                 $set: {
+                    email: email,
                     role: role,
                     username: username,
                     data: req.body
@@ -192,7 +201,7 @@ app.post('/contact', async (req, res) => {
 
 app.delete('/userDelete/:id', async (req, res) => {
 
-    const id = req.params.id
+    const id = req?.params?.id
     const deletedUser = await user.findOneAndDelete({ _id: new ObjectId(id) })
     console.log(id)
     res.json(deletedUser)
