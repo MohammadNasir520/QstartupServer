@@ -129,11 +129,17 @@ exports.login = async (req, res) => {
 //   get all users 
 exports.getAllUser = async (req, res) => {
     const email = req?.query?.email
+    const id = req?.query?.id
+    console.log(id)
     console.log("user controller 132", email)
     let query = {}
     if (email) {
         query = {
             email: email
+        }
+    } else if (id) {
+        query = {
+            _id: new ObjectId(id)
         }
     }
 

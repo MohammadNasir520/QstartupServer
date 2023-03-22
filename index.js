@@ -128,8 +128,10 @@ const sendEMail = async (fromEmail, toEmail, subject, html) => {
 
 // send link and add token to the users document 
 app.post('/sendResetLinkEmail', async (req, res) => {
+    let email = req.body.email;
 
-    const email = req.body.email;
+    // const email = req.body.email;
+    console.log('email', email)
     const userData = await user.findOne({ email: email })
     const password = userData?.password
 
