@@ -64,7 +64,7 @@ exports.signUp = async (req, res) => {
             expiresIn: "1h"
         }
     )
-
+    console.log(result)
     // sending response to client site
     res.send({ ...result, token, message: "signup successful" })
 
@@ -116,7 +116,7 @@ exports.login = async (req, res) => {
     // saved user transfer to object for sending the response and delete password, _id to send respond for sucurity purpose
     result = result.toObject()
     delete result.password
-    delete result._id
+    // delete result._id
 
     // sending the response
     res.send({ ...result, token })
@@ -137,8 +137,10 @@ exports.getAllUser = async (req, res) => {
         query = {
             email: email
         }
-    } else if (id) {
+    }
+    else if (id) {
         query = {
+
             _id: new ObjectId(id)
         }
     }
@@ -146,82 +148,12 @@ exports.getAllUser = async (req, res) => {
     const users = await user.find(query)
 
     if (users) {
+        console.log(users)
         console.log(email, 'user controler 143')
         res.json(users)
     } else {
         res.json({ message: 'user not found' })
     }
 
-    // try {
-    //     const users = await user.find()
-    //     res.send(users)
-    // } catch (error) {
-    //     console.log(error)
 
-    // }
 }
-
-
-// const user = require("../models/userModels")
-// const jwt = require("jsonwebtoken")
-
-
-// exports.signUp = async (req, res) => {
-
-
-//     console.log(req.body)
-//     const { username, email } = req.body;
-//     console.log(username, email)
-
-//     try {
-//         // Find the existing document with the given email address
-//         const existingUser = await user.findOne({ email });
-
-//         if (existingUser) {
-//             // If the document exists, update its fields
-//             existingUser.username = username;
-//             await existingUser.save();
-
-//             res.json("updated and signUp  successful ");
-//         } else if (!existingUser) {
-//             // If the document doesn't exist, create a new one
-//             await user.create({ username, email });
-//             res.json('user creation and signup successful')
-//         }
-
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).send("Update failed");
-//     }
-// }
-
-
-
-
-
-
-
-
-// exports.login = async (req, res) => {
-
-//     let result = await user.findOne({ username: req.body.username })
-//     if (!result) {
-//         return res.status(404).send('user does not exist')
-//     }
-//     else if (result.password !== req.body.password) {
-//         return res.status(404).send('password does not matched')
-//     }
-//     const token = jwt.sign(
-//         {
-//             username: result.username,
-//         },
-//         process.env.ACCESS_TOKEN_SECRET,
-//         {
-//             expiresIn: "1h"
-//         }
-//     )
-//     console.log(result)
-//     result = result.toObject()
-//     delete result.password
-//     res.send({ result, token })
-// }

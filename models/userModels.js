@@ -24,7 +24,9 @@ const userSchema = new mongoose.Schema({
     },
     token: {
         type: String
+    },
+    id: {
+        type: String
     }
-
 })
 module.exports = mongoose.model('users', userSchema)

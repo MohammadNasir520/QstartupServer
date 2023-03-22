@@ -59,12 +59,23 @@ app.put('/registration', async (req, res) => {
 
         email = req.body.email_StartUp;
     }
-    if (req.body.email_Mentor) {
+    else if (req.body.email_Mentor) {
 
         email = req.body.email_Mentor;
     }
     const role = req.body.role;
     const username = req.body.username;
+    const ExistingUser = await user.findOne({ email: email })
+    console.log('existingUser', ExistingUser)
+    let id = ''
+    if (req.body.email_StartUp) {
+
+        id = 'S' + ExistingUser._id;
+    }
+    else if (req.body.email_Mentor) {
+
+        id = 'M' + ExistingUser._id;
+    }
     console.log(req.body)
     console.log(role)
 
@@ -75,6 +86,7 @@ app.put('/registration', async (req, res) => {
 
             {
                 $set: {
+                    id: id,
                     email: email,
                     role: role,
                     username: username,
