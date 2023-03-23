@@ -27,6 +27,9 @@ const userSchema = new mongoose.Schema({
     },
     id: {
         type: String
+    },
+    socialMedalLink: {
+        type: Object
     }
 })
 module.exports = mongoose.model('users', userSchema)
