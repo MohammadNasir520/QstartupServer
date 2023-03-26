@@ -126,11 +126,11 @@ exports.login = async (req, res) => {
 
 
 
-//   get all users 
+//   get all users  or user by id
 exports.getAllUser = async (req, res) => {
     const email = req?.query?.email
     const id = req?.query?.id
-    console.log(id)
+    console.log('find by email', email)
     console.log("user controller 132", email)
     let query = {}
     if (email) {
@@ -149,7 +149,31 @@ exports.getAllUser = async (req, res) => {
 
     if (users) {
         console.log(users)
-        console.log(email, 'user controler 143')
+
+        res.json(users)
+    } else {
+        res.json({ message: 'user not found' })
+    }
+
+
+}
+
+//   get get users by id and role
+exports.getUserByIdandRole = async (req, res) => {
+
+    const id = req?.query?.id
+    const role = req.query.role;
+    console.log('role', role)
+
+    query = {
+        role: role,
+        _id: new ObjectId(id)
+    }
+
+    const users = await user.find(query)
+
+    if (!users.length == 0) {
+
         res.json(users)
     } else {
         res.json({ message: 'user not found' })

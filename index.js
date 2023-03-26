@@ -54,6 +54,7 @@ database()
 
 // puting the data of mentor and startup
 app.put('/registration', async (req, res) => {
+
     let email = '';
     if (req.body.email_StartUp) {
 
@@ -110,10 +111,10 @@ const sendEMail = async (fromEmail, toEmail, subject, html) => {
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
-        secure: false, // true for 465, false for other ports
+        secure: false,
         auth: {
-            user: process.env.Email, // generated ethereal user
-            pass: process.env.GmailAppPassword, // generated ethereal password
+            user: process.env.Email,
+            pass: process.env.GmailAppPassword,
         },
     });
 
