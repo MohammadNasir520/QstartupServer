@@ -82,7 +82,7 @@ app.put('/registration', async (req, res) => {
 
     try {
 
-        await user.findOneAndUpdate(
+        registered = await user.findOneAndUpdate(
             { email },
 
             {
@@ -96,7 +96,12 @@ app.put('/registration', async (req, res) => {
             },
             { upsert: true }
         );
-        res.json('updated');
+        if (!registered) {
+            res.json({ message: 'something going wrong please try again' });
+        } else if (registered) {
+            res.json({ data: registered, message: 'registration successful' });
+
+        }
 
 
     } catch (err) {
@@ -217,9 +222,10 @@ app.post('/contact', async (req, res) => {
 app.delete('/userDelete/:id', async (req, res) => {
 
     const id = req?.params?.id
-    const deletedUser = await user.findOneAndDelete({ _id: new ObjectId(id) })
     console.log(id)
-    res.json(deletedUser)
+    const deletedUser = await user.findOneAndDelete({ id: id })
+    console.log(id)
+    res.send(deletedUser)
 })
 
 

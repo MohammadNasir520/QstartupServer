@@ -20,6 +20,12 @@ exports.signUp = async (req, res) => {
 
 
     // custom validation
+
+    if (existingUser?.email === email) {
+        return res.status(400).send({ message: 'email already exist' })
+    }
+
+
     if (email === "" || email === undefined || !email) {
         return res.status(404).send({ message: 'email  should not be empty' })
     }
@@ -37,9 +43,6 @@ exports.signUp = async (req, res) => {
         return res.status(404).send({ message: 'password must be at least 6 character' })
     }
 
-    if (existingUser?.email === email) {
-        return res.status(400).send({ message: 'email already exist' })
-    }
 
     // delete confirm password from saving in database
     delete req.body.confirmpassword;
@@ -85,19 +88,19 @@ exports.login = async (req, res) => {
 
     //  custom validation of email
     if (email === "" || email === undefined || !email) {
-        return res.status(404).send({ message: 'email  should not be empty' })
+        return res.status(404).json({ message: 'email  should not be empty' })
     }
 
 
     // user find from saved data base
     let result = await user.findOne({ email: email })
     if (!result) {
-        return res.status(404).send('user does not exist')
+        return res.status(404).json({ message: 'user does not exist' })
     }
 
     // validation of saved password and users input password
     else if (result.password !== password) {
-        return res.status(404).json('incorrect password')
+        return res.status(404).json({ message: 'incorrect password' })
     }
 
 
@@ -119,7 +122,7 @@ exports.login = async (req, res) => {
     // delete result._id
 
     // sending the response
-    res.send({ ...result, token })
+    res.status(200).send({ ...result, token })
 }
 // ______________________________________login API End______________________________________________
 
