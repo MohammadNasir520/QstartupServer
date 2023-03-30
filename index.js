@@ -52,6 +52,14 @@ const database = module.exports = () => {
 }
 database()
 
+// serveer less function
+// export default function hello(req, res) {
+//     res.statusCode = 200;
+//     res.json({ message: 'It works' });
+// }
+
+
+
 // puting the data of mentor and startup
 app.put('/registration', async (req, res) => {
 
@@ -154,7 +162,7 @@ app.post('/sendResetLinkEmail', async (req, res) => {
     const password = userData?.password
 
     if (!userData) {
-        return res.status(400).json('user not found')
+        return res.status(400).json({ message: 'user not found' })
 
     }
     else {
@@ -163,10 +171,12 @@ app.post('/sendResetLinkEmail', async (req, res) => {
 
         const subject = "reset your Password"
         const from = process.env.Email
-        const html = `<a href="http://localhost:5000/resetPasswordForm?token=${token}">click here </a> <p> to reset your password </p>`
+        const html = `<a href="https://qstartupserver.onrender.com/resetPasswordForm?token=${token}">click here </a> <p> to reset your password </p>`
 
         sendEMail(from, userData.email, subject, html)
-        res.send({ message: "please check your Email and reset your password" })
+        // res.status(200).send({ message: "please check your Email and reset your password" })
+        res.status(200).json({ status: 200, message: "please check your Email inbox or spam and reset your password" });
+
 
     }
 
@@ -201,7 +211,11 @@ app.post('/resetPassword', async (req, res) => {
         const updatedUserData = await user.findOneAndUpdate({ email: UserData.email }, { $set: { password: password, token: "" } }, { new: true })
         // res.send(updatedUserData)
         if (updatedUserData) {
-            res.send("password reset successfully")
+
+
+            res.render('LoginPageRedirect')
+
+
 
         }
     }
