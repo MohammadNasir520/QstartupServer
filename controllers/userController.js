@@ -144,7 +144,8 @@ exports.getAllUser = async (req, res) => {
     else if (id) {
         query = {
 
-            _id: new ObjectId(id)
+            // _id: new ObjectId(id)
+            id: id
         }
     }
 
