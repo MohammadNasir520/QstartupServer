@@ -58,6 +58,35 @@ database()
 //     res.json({ message: 'It works' });
 // }
 
+//  send mail function
+const sendEMail = async (fromEmail, toEmail, subject, html) => {
+
+    const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        auth: {
+            user: process.env.Email,
+            pass: process.env.GmailAppPassword,
+        },
+    });
+
+    const mailOptions = ({
+        from: fromEmail,
+        to: toEmail,
+        subject: subject,
+
+        html: html,
+    });
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error)
+        } else {
+            console.log('Email sent: ' + info.response);
+        }
+    })
+
+}
 
 
 // puting the data of mentor and startup
@@ -77,6 +106,7 @@ app.put('/registration', async (req, res) => {
     const ExistingUser = await user.findOne({ email: email })
     console.log('existingUser', ExistingUser)
     let id = ''
+
     if (req.body.email_StartUp) {
 
         id = 'S' + ExistingUser._id;
@@ -107,7 +137,17 @@ app.put('/registration', async (req, res) => {
         if (!registered) {
             res.json({ message: 'something going wrong please try again' });
         } else if (registered) {
-            res.json({ data: registered, message: 'registration successful' });
+
+            const subject = "Registration successful"
+            const from = process.env.Email
+            const html = `<a>Congratulaton for successfully registration <br>
+            at QStartUp as ${req.body.email_StartUp ? "startUp" : "mentor"} <br>
+            Your unique Id: ${id} <br>
+            please keep the Unique ID 
+            </p> `
+            const emailSend = await sendEMail(from, registered.email, subject, html)
+            res.json({ data: registered, message: 'registration successful', emailSend });
+
 
         }
 
@@ -118,35 +158,6 @@ app.put('/registration', async (req, res) => {
     }
 });
 
-//  send mail function
-const sendEMail = async (fromEmail, toEmail, subject, html) => {
-
-    const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false,
-        auth: {
-            user: process.env.Email,
-            pass: process.env.GmailAppPassword,
-        },
-    });
-
-    const mailOptions = ({
-        from: fromEmail,
-        to: toEmail,
-        subject: subject,
-
-        html: html,
-    });
-    transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-            console.log(error)
-        } else {
-            console.log('Email sent: ' + info.response);
-        }
-    })
-
-}
 
 
 
