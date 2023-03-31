@@ -146,7 +146,7 @@ app.put('/registration', async (req, res) => {
             please keep the Unique ID 
             </p> `
             const emailSend = await sendEMail(from, registered.email, subject, html)
-            res.json({ data: registered, message: 'registration successful', emailSend });
+            res.json({ data: registered, message: 'registration successful , Check Your Email and collect Unique ID', emailSend });
 
 
         }
