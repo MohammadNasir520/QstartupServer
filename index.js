@@ -132,7 +132,7 @@ app.put('/registration', async (req, res) => {
                     data: req.body
                 }
             },
-            { upsert: true }
+            { upsert: true, new: true }
         );
         if (!registered) {
             res.json({ message: 'something going wrong please try again' });
@@ -146,7 +146,7 @@ app.put('/registration', async (req, res) => {
             please keep the Unique ID 
             </p> `
             const emailSend = await sendEMail(from, registered.email, subject, html)
-            res.json({ data: registered, message: 'registration successful , Check Your Email and collect Unique ID', emailSend });
+            res.status(200).json({ status: 200, data: registered, message: 'registration successful , Check Your Email and collect Unique ID', emailSend });
 
 
         }
@@ -200,11 +200,11 @@ app.put('/EditUser', async (req, res) => {
             { upsert: true }
         );
         if (!registered) {
-            res.json({ message: 'something going wrong please try again' });
+            res.status(404).json({ status: 404, message: 'something going wrong please try again' });
         } else if (registered) {
 
 
-            res.json({ data: registered, message: 'Edit success full' });
+            res.status(200).json({ status: 200, data: registered, message: 'Edit success full' });
 
 
         }
@@ -215,55 +215,6 @@ app.put('/EditUser', async (req, res) => {
         res.status(500).send(err);
     }
 });
-
-
-
-// app.put('/EditUser', async (req, res) => {
-
-//     let id = req.query.id;
-//     console.log(id)
-//     let email = '';
-//     if (req.body.email_StartUp) {
-//         email = req.body.email_StartUp;
-//     }
-//     else if (req.body.email_Mentor) {
-//         email = req.body.email_Mentor;
-//     }
-//     const role = req.body.role;
-//     const username = req.body.username;
-
-//     try {
-//         // Get existing user data
-//         const existingUser = await user.findOne({ id: id });
-//         console.log('existingUser', existingUser);
-
-//         // Merge existing user data with the new data in the request body
-//         const updatedUser = Object.assign(existingUser, req.body, {
-//             id: id,
-//             email: email,
-//             role: role,
-//             username: username,
-//         });
-
-//         // Update the user in the database
-//         const registered = await user.findOneAndUpdate(
-//             { id: id },
-//             { $set: updatedUser },
-//             { upsert: true }
-//         );
-
-//         if (!registered) {
-//             res.json({ message: 'something going wrong please try again' });
-//         } else if (registered) {
-//             res.json({ data: registered, message: 'Edit success full' });
-//         }
-
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).send(err);
-//     }
-// });
-
 
 
 // send link and add token to the users document 

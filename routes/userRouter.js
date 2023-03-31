@@ -52,7 +52,7 @@ router.put('/socialMedia', async (req, res) => {
             { upsert: true }
         );
         if (updated) {
-            res.send({ message: 'social media link saved successfully', data: updated });
+            res.status(200).json({ status: 200, message: 'social media link saved successfully', data: updated });
         }
 
 
