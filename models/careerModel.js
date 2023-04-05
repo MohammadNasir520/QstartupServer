@@ -26,6 +26,15 @@ const careerSchema = new mongoose.Schema({
     email: {
         type: String
     },
+    resume: {
+        type: String
+    },
+    cv: {
+        type: String
+    },
+    date: {
+        type: String
+    }
 
 })
 module.exports = mongoose.model("career", careerSchema)

@@ -11,29 +11,16 @@ const nodemailer = require("nodemailer")
 mongoose.set('strictQuery', true);
 
 
-
-
-
-
-
-
 const user = require('./models/userModels')
 // const checkAuth = require('./db/middleware/CheckAuth')
 const userRouter = require("./routes/userRouter")
 const careerRouter = require("./routes/careerRouter")
 const startUpRouter = require("./routes/startupRouter")
+const career = require("./models/careerModel")
 
 // ejs setup
 const ejs = require('ejs');
 app.set('view engine', 'ejs');
-
-
-
-
-
-
-
-
 
 
 
@@ -392,13 +379,29 @@ app.post('/application', upload.fields([
     async (req, res) => {
         try {
             console.log('hit')
+            const { FirstName, FamilyName } = req.body
+            const name = FirstName + FamilyName
 
-            res.json("succes")
+            const now = new Date();
+            const day = now.getDate();
+            const month = now.getMonth() + 1; // add 1 because January is 0
+            const year = now.getFullYear();
+            console.log(`Today's date is ${day}/${month}/${year}`);
+            const date = `${day}/${month}/${year}`
+
+            console.log('date', date)
+            const resume = req.files?.resume[0].destination + req.files?.resume[0].filename
+            const cv = req.files?.cv[0].destination + req.files?.cv[0].filename
+
+            const careerData = new career({ name, ...req.body, resume, cv, date })
+            const dataSaved = await careerData.save()
+            res.json(dataSaved)
+
+            console.log(dataSaved)
             console.log(req.files)
-            return console.log(req.body)
-
-
-
+            console.log('resume', req.files?.resume[0].filename)
+            console.log("cv", req.files?.cv[0].filename)
+            console.log(req.body)
 
         } catch (err) {
             console.error(err);
@@ -426,7 +429,7 @@ app.get('/downloadPdf', (req, res) => {
 
 
 
-    const filePath = './uploads/md.-nasir-uddin-certificate-1680668008323.pdf';
+    const filePath = './uploads/md.nasiruddincertificate-(1)-1680695484903.pdf';
     res.download(filePath);
 
 })
