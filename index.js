@@ -380,7 +380,7 @@ app.post('/application', upload.fields([
         try {
             console.log('hit')
             const { FirstName, FamilyName } = req.body
-            const name = FirstName + FamilyName
+            const name = FirstName + _ + FamilyName
 
             const now = new Date();
             const day = now.getDate();
@@ -437,7 +437,11 @@ app.get('/downloadPdf', (req, res) => {
 
 
 
-
+// get all Applicants
+app.get('/api/applicants', async (req, res) => {
+    const allAplicants = await career.find()
+    res.send(allAplicants)
+})
 
 
 

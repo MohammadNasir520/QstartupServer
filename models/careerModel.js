@@ -34,6 +34,9 @@ const careerSchema = new mongoose.Schema({
     },
     date: {
         type: String
+    },
+    name: {
+        type: String
     }
 
 })
