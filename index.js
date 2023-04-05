@@ -2,12 +2,19 @@ const express = require('express')
 const app = express()
 const cors = require("cors")
 const mongoose = require('mongoose')
+const { ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 const jwt = require('jsonwebtoken')
 require("dotenv").config()
 const nodemailer = require("nodemailer")
 
 mongoose.set('strictQuery', true);
+
+
+
+
+
+
 
 
 const user = require('./models/userModels')
@@ -20,9 +27,16 @@ const startUpRouter = require("./routes/startupRouter")
 const ejs = require('ejs');
 app.set('view engine', 'ejs');
 
-const bodyParser = require('body-parser');
-const { ObjectId } = require('mongodb');
-app.use(bodyParser.urlencoded({ extended: true }));
+
+
+
+
+
+
+
+
+
+
 
 // middleware 
 app.use(cors());
@@ -31,6 +45,34 @@ app.use(express.json())
 app.use(userRouter)
 app.use(careerRouter)
 app.use(startUpRouter)
+
+
+
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
+const multer = require("multer");
+const path = require("path");
+
+
+
+app.use(bodyParser.json());
+const corsOptions = {
+    origin: 'http://127.0.0.1:5500',
+    credentials: true
+};
+
+app.use(cors(corsOptions));
+
+
+require("dotenv").config()
+
+app.use(cors()); // enable CORS for all origins
+app.use(bodyParser.json()); // handle JSON payloads
+app.use(express.json())
+
+
 
 // database connection
 const database = module.exports = () => {
@@ -42,6 +84,7 @@ const database = module.exports = () => {
 
     try {
         mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.c5dej4c.mongodb.net/duckcart?retryWrites=true&w=majority`, connectionParams)
+        // mongoose.connect(`mongodb://localhost:27017/Qstartup`)
         // mongoose.connect(`mongodb://localhost:27017/duckcart`, connectionParams)
 
         console.log('database connected successfully')
@@ -52,11 +95,7 @@ const database = module.exports = () => {
 }
 database()
 
-// serveer less function
-// export default function hello(req, res) {
-//     res.statusCode = 200;
-//     res.json({ message: 'It works' });
-// }
+
 
 //  send mail function
 const sendEMail = async (fromEmail, toEmail, subject, html) => {
@@ -140,11 +179,14 @@ app.put('/registration', async (req, res) => {
 
             const subject = "Registration successful"
             const from = process.env.Email
-            const html = `<a>Congratulaton for successfully registration <br>
+
+            const html = `
+            <a>Congratulaton for successfully registration <br>
             at QStartUp as ${req.body.email_StartUp ? "startUp" : "mentor"} <br>
             Your unique Id: ${id} <br>
             please keep the Unique ID 
             </p> `
+
             const emailSend = await sendEMail(from, registered.email, subject, html)
             res.status(200).json({ status: 200, data: registered, message: 'registration successful , Check Your Email and collect Unique ID', emailSend });
 
@@ -228,7 +270,6 @@ app.post('/sendResetLinkEmail', async (req, res) => {
 
     if (!userData) {
         return res.status(400).json({ message: 'user not found' })
-
     }
     else {
         const token = jwt.sign({ password }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" })
@@ -276,12 +317,7 @@ app.post('/resetPassword', async (req, res) => {
         const updatedUserData = await user.findOneAndUpdate({ email: UserData.email }, { $set: { password: password, token: "" } }, { new: true })
         // res.send(updatedUserData)
         if (updatedUserData) {
-
-
             res.render('LoginPageRedirect')
-
-
-
         }
     }
     console.log(token)
@@ -306,6 +342,101 @@ app.delete('/userDelete/:id', async (req, res) => {
     console.log(id)
     res.send(deletedUser)
 })
+
+
+
+//  file uplod and dwonload
+
+
+const UPLOADS_FOLDER = "./uploads/";
+// configure multer to handle file uploads
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => {
+            cb(null, UPLOADS_FOLDER);
+        },
+        // filename: function (req, file, callback) {
+        //     console.log('file for name', file)
+        //     callback(null, file.originalname);
+        // }
+        filename: (req, file, cb) => {
+            const fileExt = path.extname(file.originalname);
+            const fileName =
+                file.originalname
+                    .replace(fileExt, "")
+                    .toLowerCase()
+                    .split(" ")
+                    .join("-") +
+                "-" +
+                Date.now();
+
+            cb(null, fileName + fileExt);
+        },
+    })
+});
+
+
+
+
+
+app.post('/application', upload.fields([
+    {
+        name: "resume",
+        maxCount: 1,
+    },
+    {
+        name: "cv",
+        maxCount: 1,
+    },
+]),
+    async (req, res) => {
+        try {
+            console.log('hit')
+
+            res.json("succes")
+            console.log(req.files)
+            return console.log(req.body)
+
+
+
+
+        } catch (err) {
+            console.error(err);
+            res.status(500).json('Error uploading PDF');
+        }
+    });
+
+// default error handler
+app.use((err, req, res, next) => {
+    if (err) {
+        if (err instanceof multer.MulterError) {
+            res.status(500).json("There was an upload error!");
+        } else {
+            res.status(500).json(err.message);
+        }
+    } else {
+        res.json("success");
+    }
+});
+
+
+
+
+app.get('/downloadPdf', (req, res) => {
+
+
+
+    const filePath = './uploads/md.-nasir-uddin-certificate-1680668008323.pdf';
+    res.download(filePath);
+
+})
+
+
+
+
+
+
+
 
 
 
