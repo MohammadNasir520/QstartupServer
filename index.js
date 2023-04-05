@@ -44,13 +44,6 @@ const path = require("path");
 
 
 
-app.use(bodyParser.json());
-const corsOptions = {
-    origin: 'http://127.0.0.1:5500',
-    credentials: true
-};
-
-app.use(cors(corsOptions));
 
 
 require("dotenv").config()
@@ -58,6 +51,15 @@ require("dotenv").config()
 app.use(cors()); // enable CORS for all origins
 app.use(bodyParser.json()); // handle JSON payloads
 app.use(express.json())
+
+app.use(bodyParser.json());
+const corsOptions = {
+    origin: 'http://127.0.0.1:5502',
+    credentials: true
+};
+
+app.use(cors(corsOptions));
+app.use(express.static('uploads'));
 
 
 
@@ -380,7 +382,7 @@ app.post('/application', upload.fields([
         try {
             console.log('hit')
             const { FirstName, FamilyName } = req.body
-            const name = FirstName + _ + FamilyName
+            const name = FirstName + '_' + FamilyName
 
             const now = new Date();
             const day = now.getDate();
@@ -427,9 +429,10 @@ app.use((err, req, res, next) => {
 
 app.get('/downloadPdf', (req, res) => {
 
+    console.log(req.query.path)
+    console.log('clicked')
 
-
-    const filePath = './uploads/md.nasiruddincertificate-(1)-1680695484903.pdf';
+    const filePath = req.query.path;
     res.download(filePath);
 
 })
