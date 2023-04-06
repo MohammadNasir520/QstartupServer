@@ -18,6 +18,6 @@ router.get('/user', getAllUser)
 router.get('/SingleUser', getUserByIdandRole)
 
 // save social medea link
-router.put('/socialMedia', upload.single('businessDocument'), socialMediaLink)
+router.put('/socialMedia', upload.single('businessFile'), socialMediaLink)
 
 module.exports = router

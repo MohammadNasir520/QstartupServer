@@ -191,7 +191,11 @@ exports.getUserByIdandRole = async (req, res) => {
 
 exports.socialMediaLink = async (req, res) => {
     const socialMedalLink = req.body;
+
     const id = req.query.id;
+
+
+
 
     let businessDocumentPath;
     if (req.file) {
@@ -213,18 +217,26 @@ exports.socialMediaLink = async (req, res) => {
         }
 
         let updatedData;
-        if (!req.file && !userDoc?.data?.businessDocument) {
-            updatedData = { ...userDoc.data, ...socialMedalLink };
-        } else if (!req.file && userDoc?.data?.businessDocument) {
-            updatedData = { ...userDoc.data, ...socialMedalLink, businessDocument: [...userDoc?.data?.businessDocument] };
-        }
-        else if (userDoc?.data?.businessDocument) {
+
+        if (req.file !== undefined && userDoc.data.businessDocument) {
 
             updatedData = { ...userDoc.data, ...socialMedalLink, businessDocument: [...userDoc?.data?.businessDocument, { documentName: req.file.filename, path: businessDocumentPath }] };
-        } else if (!userDoc?.data?.businessDocument) {
+        }
+        else if (req.file == undefined && userDoc.data.businessDocument) {
+            updatedData = { ...userDoc.data, ...socialMedalLink, businessDocument: [...userDoc?.data?.businessDocument] };
+        }
+
+        else if (req.file) {
             updatedData = { ...userDoc.data, ...socialMedalLink, businessDocument: [{ documentName: req.file.filename, path: businessDocumentPath }] };
 
         }
+
+
+        else {
+            updatedData = { ...userDoc.data, ...socialMedalLink };
+        }
+
+
 
 
         console.log(socialMedalLink, id)
