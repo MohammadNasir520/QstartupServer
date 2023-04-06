@@ -336,7 +336,6 @@ app.delete('/userDelete/:id', async (req, res) => {
 
 //  file uplod and dwonload
 
-
 const UPLOADS_FOLDER = "./uploads/";
 // configure multer to handle file uploads
 const upload = multer({

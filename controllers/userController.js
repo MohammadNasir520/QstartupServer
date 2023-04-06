@@ -6,6 +6,7 @@ const { ObjectId } = require("mongodb");
 
 
 
+
 // sign up api by email
 exports.signUp = async (req, res) => {
     console.log(req.body)
@@ -184,4 +185,62 @@ exports.getUserByIdandRole = async (req, res) => {
     }
 
 
+}
+
+// save social media and busniess document save 
+
+exports.socialMediaLink = async (req, res) => {
+    const socialMedalLink = req.body;
+    const id = req.query.id;
+
+
+    const businessDocumentPath = req.file.destination + req.file.filename
+    console.log('path', businessDocumentPath)
+
+    console.log('social', socialMedalLink)
+    console.log('bussinesDoucument', req.file)
+    try {
+        const userDoc = await user.findById(id);
+        if (!userDoc) {
+            res.status(404).send({ message: 'User not found' });
+            return;
+        }
+
+        let updatedData;
+        if (userDoc?.data?.businessDocument) {
+
+            updatedData = { ...userDoc.data, ...socialMedalLink, businessDocument: [...userDoc?.data?.businessDocument, { documentName: req.file.filename, path: businessDocumentPath }] };
+        } else {
+            updatedData = { ...userDoc.data, ...socialMedalLink, businessDocument: [{ documentName: req.file.filename, path: businessDocumentPath }] };
+
+        }
+
+
+        console.log(socialMedalLink, id)
+
+
+        const updated = await user.findOneAndUpdate(
+            { _id: new ObjectId(id) },
+
+            {
+                $set: {
+                    // id: id,
+                    // email: email,
+                    // role: role,
+                    // username: username,
+                    // data: req.body
+                    data: updatedData,
+
+                }
+            },
+            { upsert: true }
+        );
+        if (updated) {
+            res.status(200).json({ status: 200, message: 'social media link saved successfully', data: updated });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err);
+    }
+    console.log(socialMedalLink)
 }
