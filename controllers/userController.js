@@ -193,8 +193,14 @@ exports.socialMediaLink = async (req, res) => {
     const socialMedalLink = req.body;
     const id = req.query.id;
 
+    let businessDocumentPath;
+    if (req.file) {
 
-    const businessDocumentPath = req.file.destination + req.file.filename
+        businessDocumentPath = req?.file.destination + req?.file.filename
+    }
+
+
+
     console.log('path', businessDocumentPath)
 
     console.log('social', socialMedalLink)
@@ -207,10 +213,15 @@ exports.socialMediaLink = async (req, res) => {
         }
 
         let updatedData;
-        if (userDoc?.data?.businessDocument) {
+        if (!req.file && !userDoc?.data?.businessDocument) {
+            updatedData = { ...userDoc.data, ...socialMedalLink };
+        } else if (!req.file && userDoc?.data?.businessDocument) {
+            updatedData = { ...userDoc.data, ...socialMedalLink, businessDocument: [...userDoc?.data?.businessDocument] };
+        }
+        else if (userDoc?.data?.businessDocument) {
 
             updatedData = { ...userDoc.data, ...socialMedalLink, businessDocument: [...userDoc?.data?.businessDocument, { documentName: req.file.filename, path: businessDocumentPath }] };
-        } else {
+        } else if (!userDoc?.data?.businessDocument) {
             updatedData = { ...userDoc.data, ...socialMedalLink, businessDocument: [{ documentName: req.file.filename, path: businessDocumentPath }] };
 
         }
@@ -233,7 +244,7 @@ exports.socialMediaLink = async (req, res) => {
 
                 }
             },
-            { upsert: true }
+            { upsert: true, new: true }
         );
         if (updated) {
             res.status(200).json({ status: 200, message: 'social media link saved successfully', data: updated });
