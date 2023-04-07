@@ -466,20 +466,34 @@ app.delete('/api/deletePdf', async (req, res) => {
         console.log('file delete hit')
         const resumePath = req.query.path;
         if (!fs.existsSync(resumePath)) {
-            return res.status(404).send("File not found.");
+            return res.status(404).json("File not found.");
         }
-        fs.unlink(resumePath, (error) => {
+        fs.unlink(resumePath, async (error) => {
             if (error) {
                 console.log(error)
-                res.status(500).send('Error deleting file');
+                res.status(500).json('Error deleting file');
                 return;
             }
-            console.log(`${resumePath} deleted successfully`);
-            res.send(`${resumePath} deleted successfully`);
+
+            const deletePdfData = await user.updateOne(
+
+                { 'data.businessDocument': { $elemMatch: { path: resumePath } } },
+                { $pull: { 'data.businessDocument': { path: resumePath } } },
+
+            )
+
+
+            if (deletePdfData.nModified === 0) {
+                console.log(`Failed to delete document with path: ${resumePath}`);
+                res.status(404).json(`Failed to delete document with path: ${resumePath}`);
+            } else {
+                console.log(`${resumePath} deleted successfully`);
+                res.json(`${resumePath} deleted successfully`);
+            }
         });
     } catch (error) {
         console.log(error);
-        res.status(500).send('Error deleting file');
+        res.status(500).json('Error deleting file');
     }
 });
 
