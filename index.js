@@ -63,7 +63,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.static('uploads'));
 
-
+const fs = require('fs')
 
 // database connection
 const database = module.exports = () => {
@@ -398,6 +398,7 @@ app.post('/application', upload.fields([
             const resume = req.files?.resume[0].destination + req.files?.resume[0].filename
             const cv = req.files?.cv[0].destination + req.files?.cv[0].filename
 
+
             const careerData = new career({ name, ...req.body, resume, cv, date })
             const dataSaved = await careerData.save()
             res.json(dataSaved)
@@ -439,6 +440,48 @@ app.get('/downloadPdf', (req, res) => {
     res.download(filePath);
 
 })
+
+//  delete pdf ................................................
+
+// app.delete('/api/deletePdf', async (req, res) => {
+//     console.log('file delete hit')
+//     const resumePath = req.query.path
+//     fs.unlink(resumePath, (error) => {
+//         if (error) {
+//             console.log(error)
+//             res.status(500).send('Error deleting file');
+//             return;
+//         }
+//         // console.log(`${fileName} deleted successfully`);
+//         // res.send(`${fileName} deleted successfully`);
+
+
+//     })
+
+//     console.log(resumePath)
+// })
+
+app.delete('/api/deletePdf', async (req, res) => {
+    try {
+        console.log('file delete hit')
+        const resumePath = req.query.path;
+        if (!fs.existsSync(resumePath)) {
+            return res.status(404).send("File not found.");
+        }
+        fs.unlink(resumePath, (error) => {
+            if (error) {
+                console.log(error)
+                res.status(500).send('Error deleting file');
+                return;
+            }
+            console.log(`${resumePath} deleted successfully`);
+            res.send(`${resumePath} deleted successfully`);
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Error deleting file');
+    }
+});
 
 
 

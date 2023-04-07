@@ -219,13 +219,14 @@ exports.socialMediaLink = async (req, res) => {
 
     const id = req.query.id;
 
-
+    console.log('pathe ', req.file?.path)
 
 
     let businessDocumentPath;
     if (req.file) {
 
         businessDocumentPath = req?.file.destination + req?.file.filename
+        // businessDocumentPath = req?.file.path
     }
 
 
