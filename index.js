@@ -41,6 +41,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const multer = require("multer");
 const path = require("path");
+// const { subscribe } = require('./routes/userRouter');
+// const { findOneAndUpdate } = require('./models/userModels');
 
 
 
@@ -321,6 +323,8 @@ app.post('/contact', async (req, res) => {
     const toEmail = 'nasirahsan520@gmail.com';
     const html = `<p>${message + email} </p>`
     sendEMail(fromEmail = email, toEmail, subject, html)
+    res.status(200).send({ success: true, message: 'Email sent successfully' })
+
 })
 
 app.delete('/userDelete/:id', async (req, res) => {
@@ -446,7 +450,69 @@ app.get('/api/applicants', async (req, res) => {
 })
 
 
+// subscribe 
+app.put('/api/subscribe', async (req, res) => {
+    const email = req.body.email;
+    const findedUser = await user.findOne({ email: email })
+    // console.log(findedUser)
 
+    try {
+
+        if (findedUser && findedUser !== null) {
+            console.log(' found')
+
+            let subscribeUpdaed = await user.findOneAndUpdate(
+                {
+                    email: email
+                },
+                {
+
+                    $set: {
+                        subscribe: true,
+
+                    }
+                },
+                {
+                    upsert: true,
+                    new: true
+                }
+            )
+
+            if (subscribeUpdaed) {
+                res.status(200).send({
+                    success: true,
+                    message: 'subscription successful',
+                    data: subscribeUpdaed
+                })
+            }
+        }
+
+        else if (!findedUser) {
+            console.log('not found')
+            let newUser = new user(
+                {
+                    email: email,
+                    subscribe: true,
+                    role: 'preUser'
+                }
+            )
+            let saved = await newUser.save()
+            res.status(200).send({
+                success: true,
+                message: 'subscription successful',
+                data: saved
+            })
+
+
+        }
+
+
+
+    } catch (error) {
+        console.log(error)
+
+    }
+})
 
 
 app.get('/', (req, res) => {

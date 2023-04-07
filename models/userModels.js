@@ -30,6 +30,9 @@ const userSchema = new mongoose.Schema({
     },
     socialMedalLink: {
         type: Object
+    },
+    subscribe: {
+        type: Boolean
     }
 })
 module.exports = mongoose.model('users', userSchema)

@@ -22,7 +22,7 @@ exports.signUp = async (req, res) => {
 
     // custom validation
 
-    if (existingUser?.email === email) {
+    if (existingUser?.email === email && existingUser?.role === 'mentor' || existingUser?.role === 'startUp' || existingUser?.role === 'admin') {
         return res.status(400).send({ message: 'email already exist' })
     }
 
@@ -49,10 +49,35 @@ exports.signUp = async (req, res) => {
     delete req.body.confirmpassword;
 
 
-    // creating user and save to database
-    let newUser = new user(req.body);
-    let result = await newUser.save()
-    console.log(result)
+    let result;
+
+    if (existingUser.email === email && existingUser.role === 'preUser') {
+        let userUpdated = await user.findOneAndUpdate(
+            {
+                email: email
+            },
+            {
+
+                $set: {
+                    username: username,
+                    password: password,
+                    role: 'user'
+                }
+            },
+            {
+                upsert: true,
+                new: true
+            }
+        )
+        result = userUpdated
+    } else {
+        // creating user and save to database 
+        let newUser = new user({ ...req.body, role: 'user' });
+        result = await newUser.save()
+        console.log(result)
+    }
+
+
 
     // saved user transfer to object for sending the response and delete password to send respond for sucurity purpose
     result = result.toObject();
