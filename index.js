@@ -462,9 +462,72 @@ app.get('/downloadPdf', (req, res) => {
 // })
 
 app.delete('/api/deletePdf', async (req, res) => {
+    console.log('file delete hit')
+    const resumePath = req.query.path;
+    console.log(resumePath)
+    console.log(req.query.for)
     try {
-        console.log('file delete hit')
-        const resumePath = req.query.path;
+
+        if (req.query.for == 'applicant') {
+            console.log('for hit')
+            // const deleteResume_cv = await career.updateOne(
+            //     // { resume: resumePath },
+            //     // { $unset: { resume: resumePath } },
+
+            //     { $or: [{ resume: resumePath }, { cv: resumePath }] },
+            //     { $unset: { resume: resumePath, cv: resumePath } },
+
+            //     { new: true }
+            // )
+
+
+            let deleteResume_cv;
+            const matchingDoc = await career.findOne({ $or: [{ cv: resumePath }, { resume: resumePath }] });
+
+            const matchingResume = await career.findOne({ resume: resumePath });
+            const matchingCv = await career.findOne({ cv: resumePath });
+            if (matchingResume) {
+                if (matchingResume && matchingDoc.cv) {
+                    deleteResume_cv = await career.updateOne(
+                        { resume: resumePath },
+                        { $unset: { resume: 1 } },
+                        { new: true }
+                    )
+                } else if (matchingResume && !matchingDoc.cv) {
+                    const deletedDoc = await career.deleteOne({ $or: [{ cv: resumePath }, { resume: resumePath }] });
+                    console.log(deletedDoc)
+                }
+            } else {
+                if (matchingCv && matchingDoc.resume) {
+                    deleteResume_cv = await career.updateOne(
+                        { cv: resumePath },
+                        { $unset: { cv: 1 } },
+                        { new: true }
+                    );
+
+                } else if (matchingCv && !matchingDoc.resume) {
+                    const DeletedDoc = await career.deleteOne({ $or: [{ cv: resumePath }, { resume: resumePath }] });
+                    console.log(DeletedDoc)
+                }
+
+            }
+
+
+
+
+            if (deleteResume_cv) {
+                console.log('for hit in status')
+                return res.status(200).json({
+                    success: true,
+                    message: 'resume or cv deleted',
+                    data: deleteResume_cv
+                })
+            }
+            console.log(deleteResume_cv)
+        }
+
+
+
         if (!fs.existsSync(resumePath)) {
             return res.status(404).json("File not found.");
         }
@@ -474,6 +537,8 @@ app.delete('/api/deletePdf', async (req, res) => {
                 res.status(500).json('Error deleting file');
                 return;
             }
+
+
 
             const deletePdfData = await user.updateOne(
 
