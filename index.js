@@ -60,14 +60,18 @@ const corsOptions = {
     credentials: true
 };
 
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    next();
-});
+
 
 
 app.use(cors(corsOptions));
 app.use(express.static('uploads'));
+
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
+});
 
 const fs = require('fs')
 
