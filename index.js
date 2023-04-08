@@ -642,7 +642,7 @@ app.delete('/api/deletePdf', async (req, res) => {
                     return res.status(200).send({
                         success: true,
 
-                        message: 'business document deleted',
+                        message: 'Document  deleted',
 
                     })
                 }
