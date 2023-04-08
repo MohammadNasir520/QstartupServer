@@ -384,7 +384,19 @@ app.post('/application', upload.fields([
     async (req, res) => {
         try {
             console.log('hit')
-            const { FirstName, FamilyName } = req.body
+            const { FirstName, FamilyName, email } = req.body
+
+            const findExistingApply = await career.find({ email: email })
+            if (findExistingApply.length > 0) {
+                console.log('finded', findExistingApply)
+                return res.send({
+                    success: false,
+
+                    message: ' You have  already applied ',
+                    // data: deleteResume_cv
+                })
+            }
+
             const name = FirstName + '_' + FamilyName
 
             const now = new Date();
@@ -401,8 +413,15 @@ app.post('/application', upload.fields([
 
             const careerData = new career({ name, ...req.body, resume, cv, date })
             const dataSaved = await careerData.save()
-            res.json(dataSaved)
+            // res.json(dataSaved)
+            if (dataSaved) {
+                return res.send({
+                    success: true,
 
+                    message: ' Your apply is successful',
+                    // data: deleteResume_cv
+                })
+            }
             console.log(dataSaved)
             console.log(req.files)
             console.log('resume', req.files?.resume[0].filename)
@@ -524,13 +543,22 @@ app.delete('/api/deletePdf', async (req, res) => {
                         { $unset: { resume: 1 } },
                         { new: true }
                     )
+                    if (deleteResume_cv) {
+                        return res.status(200).send({
+                            success: true,
+                            resumeDeleted: true,
+                            message: 'resume deleted ',
+                            data: deleteResume_cv
+                        })
+                    }
+
                 } else if (matchingResume && !matchingDoc.cv) {
                     const deletedDoc = await career.deleteOne({ $or: [{ cv: resumePath }, { resume: resumePath }] });
                     console.log(deletedDoc)
                     return res.status(200).json({
                         success: true,
                         DocDelete: true,
-                        message: 'resume or cv deleted',
+                        message: 'resume and cv deleted',
                         data: deleteResume_cv
                     })
                 }
@@ -549,7 +577,7 @@ app.delete('/api/deletePdf', async (req, res) => {
                     return res.status(200).send({
                         success: true,
                         DocDelete: true,
-                        message: 'resume or cv deleted',
+                        message: 'resume and cv deleted',
                         data: deleteResume_cv
                     })
                 }
@@ -563,7 +591,7 @@ app.delete('/api/deletePdf', async (req, res) => {
                 console.log('for hit in status')
                 res.status(200).send({
                     success: true,
-                    message: 'resume or cv deleted',
+                    message: 'resume or cv deleted last',
                     data: deleteResume_cv
                 })
             }
