@@ -55,15 +55,15 @@ app.use(bodyParser.json()); // handle JSON payloads
 app.use(express.json())
 
 app.use(bodyParser.json());
-const corsOptions = {
-    origin: 'http://127.0.0.1:5502',
-    credentials: true
-};
+// const corsOptions = {
+//     origin: 'http://127.0.0.1:5502',
+//     credentials: true
+// };
 
 
 
 
-app.use(cors(corsOptions));
+// app.use(cors());
 app.use(express.static('uploads'));
 
 app.use((req, res, next) => {
