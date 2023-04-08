@@ -489,9 +489,11 @@ app.get('/downloadPdf', (req, res) => {
 app.delete('/api/deletePdf', async (req, res) => {
     console.log('file delete hit')
     const resumePath = req.query.path;
-    console.log(resumePath)
+    console.log('path', resumePath)
     console.log(req.query.for)
     try {
+
+
 
         if (req.query.for == 'applicant') {
             console.log('for hit')
@@ -602,6 +604,52 @@ app.delete('/api/deletePdf', async (req, res) => {
                 })
             }
             console.log(deleteResume_cv)
+        }
+
+
+        if (req.query.for == 'businessDocument') {
+            if (!fs.existsSync(resumePath)) {
+                return res.status(200).send({
+                    success: false,
+
+                    message: 'file not found',
+
+                })
+            }
+            fs.unlink(resumePath, async (error) => {
+                if (error) {
+                    console.log(error)
+                    return res.status(500).json('Error deleting file');
+
+                }
+
+
+
+                const deletePdfData = await user.updateOne(
+
+                    { 'data.businessDocument': { $elemMatch: { path: resumePath } } },
+                    { $pull: { 'data.businessDocument': { path: resumePath } } },
+
+                )
+
+
+                if (deletePdfData.nModified === 0) {
+                    console.log(`Failed to delete document with path: ${resumePath}`);
+                    res.status(404).json(`Failed to delete document with path: ${resumePath}`);
+                } else {
+                    console.log(`${resumePath} deleted successfully`);
+
+                    return res.status(200).send({
+                        success: true,
+
+                        message: 'business document deleted',
+
+                    })
+                }
+
+
+            });
+
         }
 
 
