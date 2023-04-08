@@ -487,8 +487,8 @@ app.delete('/api/deletePdf', async (req, res) => {
             fs.unlink(resumePath, async (error) => {
                 if (error) {
                     console.log(error)
-                    res.status(500).json('Error deleting file');
-                    return;
+                    return res.status(500).json('Error deleting file');
+
                 }
 
 
@@ -506,7 +506,7 @@ app.delete('/api/deletePdf', async (req, res) => {
                     res.status(404).json(`Failed to delete document with path: ${resumePath}`);
                 } else {
                     console.log(`${resumePath} deleted successfully`);
-                    res.json(`${resumePath} deleted successfully`);
+                    // res.json(`${resumePath} deleted successfully`);
                 }
             });
 
@@ -527,6 +527,12 @@ app.delete('/api/deletePdf', async (req, res) => {
                 } else if (matchingResume && !matchingDoc.cv) {
                     const deletedDoc = await career.deleteOne({ $or: [{ cv: resumePath }, { resume: resumePath }] });
                     console.log(deletedDoc)
+                    return res.status(200).json({
+                        success: true,
+                        DocDelete: true,
+                        message: 'resume or cv deleted',
+                        data: deleteResume_cv
+                    })
                 }
             } else {
                 if (matchingCv && matchingDoc.resume) {
@@ -539,6 +545,13 @@ app.delete('/api/deletePdf', async (req, res) => {
                 } else if (matchingCv && !matchingDoc.resume) {
                     const DeletedDoc = await career.deleteOne({ $or: [{ cv: resumePath }, { resume: resumePath }] });
                     console.log(DeletedDoc)
+
+                    return res.status(200).send({
+                        success: true,
+                        DocDelete: true,
+                        message: 'resume or cv deleted',
+                        data: deleteResume_cv
+                    })
                 }
 
             }
@@ -548,7 +561,7 @@ app.delete('/api/deletePdf', async (req, res) => {
 
             if (deleteResume_cv) {
                 console.log('for hit in status')
-                return res.status(200).json({
+                res.status(200).send({
                     success: true,
                     message: 'resume or cv deleted',
                     data: deleteResume_cv
