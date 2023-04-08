@@ -60,6 +60,12 @@ const corsOptions = {
     credentials: true
 };
 
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', 'http://127.0.0.1:5502');
+    next();
+});
+
+
 app.use(cors(corsOptions));
 app.use(express.static('uploads'));
 
