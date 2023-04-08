@@ -481,6 +481,37 @@ app.delete('/api/deletePdf', async (req, res) => {
             // )
 
 
+            if (!fs.existsSync(resumePath)) {
+                return res.status(404).json("File not found.");
+            }
+            fs.unlink(resumePath, async (error) => {
+                if (error) {
+                    console.log(error)
+                    res.status(500).json('Error deleting file');
+                    return;
+                }
+
+
+
+                const deletePdfData = await user.updateOne(
+
+                    { 'data.businessDocument': { $elemMatch: { path: resumePath } } },
+                    { $pull: { 'data.businessDocument': { path: resumePath } } },
+
+                )
+
+
+                if (deletePdfData.nModified === 0) {
+                    console.log(`Failed to delete document with path: ${resumePath}`);
+                    res.status(404).json(`Failed to delete document with path: ${resumePath}`);
+                } else {
+                    console.log(`${resumePath} deleted successfully`);
+                    res.json(`${resumePath} deleted successfully`);
+                }
+            });
+
+
+
             let deleteResume_cv;
             const matchingDoc = await career.findOne({ $or: [{ cv: resumePath }, { resume: resumePath }] });
 
@@ -528,34 +559,7 @@ app.delete('/api/deletePdf', async (req, res) => {
 
 
 
-        if (!fs.existsSync(resumePath)) {
-            return res.status(404).json("File not found.");
-        }
-        fs.unlink(resumePath, async (error) => {
-            if (error) {
-                console.log(error)
-                res.status(500).json('Error deleting file');
-                return;
-            }
 
-
-
-            const deletePdfData = await user.updateOne(
-
-                { 'data.businessDocument': { $elemMatch: { path: resumePath } } },
-                { $pull: { 'data.businessDocument': { path: resumePath } } },
-
-            )
-
-
-            if (deletePdfData.nModified === 0) {
-                console.log(`Failed to delete document with path: ${resumePath}`);
-                res.status(404).json(`Failed to delete document with path: ${resumePath}`);
-            } else {
-                console.log(`${resumePath} deleted successfully`);
-                res.json(`${resumePath} deleted successfully`);
-            }
-        });
     } catch (error) {
         console.log(error);
         res.status(500).json('Error deleting file');
