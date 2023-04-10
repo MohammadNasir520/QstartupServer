@@ -56,7 +56,7 @@ app.use(startUpRouter)
 
 // cors bolck handle
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', 'https://64343dbf2e231e4364c8c3d4--whimsical-wisp-fb32f5.netlify.app');
+    res.setHeader('Access-Control-Allow-Origin', 'https://whimsical-wisp-fb32f5.netlify.app');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -659,7 +659,7 @@ app.delete('/api/deletePdf', async (req, res) => {
 // get all Applicants
 app.get('/api/applicants', async (req, res) => {
     const allAplicants = await career.find()
-    res.send(allAplicants)
+    res.json(allAplicants)
 })
 
 
