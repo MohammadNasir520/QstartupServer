@@ -14,7 +14,7 @@ exports.signUp = async (req, res) => {
 
     // find user from users collection of the database
     const existingUser = await user.findOne({ email: email })
-    console.log(existingUser)
+    console.log('existing', existingUser)
 
 
 
@@ -23,10 +23,13 @@ exports.signUp = async (req, res) => {
 
 
 
-    if (existingUser?.email === email && existingUser?.role === 'mentor' || existingUser?.role === 'startUp' || existingUser?.role === 'admin') {
+    // if (existingUser !== null || undefined && existingUser.email === email && existingUser.role === 'mentor' || 'startUp' || 'admin' || 'user') {
+    //     return res.status(400).send({ message: 'email already exist' })
+    // }
+
+    if (existingUser?.role && existingUser.role != 'preUser') {
         return res.status(400).send({ message: 'email already exist' })
     }
-
 
     if (email === "" || email === undefined || !email) {
         return res.status(404).send({ message: 'email  should not be empty' })
@@ -52,7 +55,7 @@ exports.signUp = async (req, res) => {
 
     let result;
 
-    if (existingUser.email === email && existingUser.role === 'preUser') {
+    if (existingUser?.email === email && existingUser?.role === 'preUser') {
         let userUpdated = await user.findOneAndUpdate(
             {
                 email: email
