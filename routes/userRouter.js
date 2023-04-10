@@ -4,7 +4,9 @@ const { signUp, login, getAllUser, getUserByIdandRole, socialMediaLink } = requi
 const router = express.Router()
 const user = require('../models/userModels')
 const { upload } = require("../utils/fileUploads")
+const cookieParser = require('cookie-parser');
 
+router.use(cookieParser());
 
 // Sign Up
 router.post('/signup', signUp)

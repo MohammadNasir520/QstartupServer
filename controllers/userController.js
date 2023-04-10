@@ -1,9 +1,7 @@
 
-
 const user = require("../models/userModels")
 const jwt = require("jsonwebtoken");
 const { ObjectId } = require("mongodb");
-
 
 
 
@@ -21,6 +19,9 @@ exports.signUp = async (req, res) => {
 
 
     // custom validation
+
+
+
 
     if (existingUser?.email === email && existingUser?.role === 'mentor' || existingUser?.role === 'startUp' || existingUser?.role === 'admin') {
         return res.status(400).send({ message: 'email already exist' })
@@ -120,7 +121,7 @@ exports.login = async (req, res) => {
 
     // user find from saved data base
     let result = await user.findOne({ email: email })
-    if (!result) {
+    if (!result || !result.password) {
         return res.status(404).json({ message: 'user does not exist' })
     }
 
@@ -133,7 +134,7 @@ exports.login = async (req, res) => {
     // jwt token create
     const token = jwt.sign(
         {
-            username: result.username,
+            username: result.email,
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
@@ -147,8 +148,21 @@ exports.login = async (req, res) => {
     delete result.password
     // delete result._id
 
+
+    res.cookie('tokenL', 'tokenLs', {
+        httpOnly: false,
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+        secure: false,
+        sameSite: 'lax',
+        domain: 'https://whimsical-wisp-fb32f5.netlify.app/'
+
+    });
+
+
+
+
     // sending the response
-    res.status(200).send({ ...result, token })
+    res.status(200).send({ success: true, message: 'signUp successful', ...result, token })
 }
 // ______________________________________login API End______________________________________________
 
@@ -273,11 +287,7 @@ exports.socialMediaLink = async (req, res) => {
 
             {
                 $set: {
-                    // id: id,
-                    // email: email,
-                    // role: role,
-                    // username: username,
-                    // data: req.body
+
                     data: updatedData,
 
                 }

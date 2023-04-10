@@ -5,14 +5,20 @@ const mongoose = require('mongoose')
 const { ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 const jwt = require('jsonwebtoken')
-require("dotenv").config()
 const nodemailer = require("nodemailer")
+const fs = require('fs')
+const multer = require("multer");
+const path = require("path");
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser')
+app.use(cookieParser())
 
+
+require("dotenv").config()
 mongoose.set('strictQuery', true);
 
-
+// require routers and models
 const user = require('./models/userModels')
-// const checkAuth = require('./db/middleware/CheckAuth')
 const userRouter = require("./routes/userRouter")
 const careerRouter = require("./routes/careerRouter")
 const startUpRouter = require("./routes/startupRouter")
@@ -24,37 +30,22 @@ app.set('view engine', 'ejs');
 
 
 
-
 // middleware 
 app.use(cors());
 app.use(express.json())
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
+
+
+app.use(express.static('uploads'));
+
+
+// router middle ware
 app.use(userRouter)
 app.use(careerRouter)
 app.use(startUpRouter)
 
-
-
-const bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({ extended: true }));
-
-
-const multer = require("multer");
-const path = require("path");
-// const { subscribe } = require('./routes/userRouter');
-// const { findOneAndUpdate } = require('./models/userModels');
-
-
-
-
-
-require("dotenv").config()
-
-app.use(cors()); // enable CORS for all origins
-app.use(bodyParser.json()); // handle JSON payloads
-app.use(express.json())
-
-app.use(bodyParser.json());
 // const corsOptions = {
 //     origin: 'http://127.0.0.1:5502',
 //     credentials: true
@@ -63,9 +54,7 @@ app.use(bodyParser.json());
 
 
 
-// app.use(cors());
-app.use(express.static('uploads'));
-
+// cors bolck handle
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
@@ -74,7 +63,7 @@ app.use((req, res, next) => {
     next();
 });
 
-const fs = require('fs')
+
 
 // database connection
 const database = module.exports = () => {
@@ -86,8 +75,6 @@ const database = module.exports = () => {
 
     try {
         mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.c5dej4c.mongodb.net/duckcart?retryWrites=true&w=majority`, connectionParams)
-        // mongoose.connect(`mongodb://localhost:27017/Qstartup`)
-        // mongoose.connect(`mongodb://localhost:27017/duckcart`, connectionParams)
 
         console.log('database connected successfully')
 
@@ -334,8 +321,8 @@ app.post('/contact', async (req, res) => {
     const toEmail = 'nasirahsan520@gmail.com';
     const html = `<p>${message + email} </p>`
     sendEMail(fromEmail = email, toEmail, subject, html)
-    res.status(200).send({ success: true, message: 'Email sent successfully' })
 
+    res.status(200).send({ success: true, message: 'Email sent successfully' })
 })
 
 app.delete('/userDelete/:id', async (req, res) => {
@@ -464,10 +451,10 @@ app.use((err, req, res, next) => {
 app.get('/downloadPdf', (req, res) => {
 
     console.log(req.query.path)
-    console.log('clicked')
 
     const filePath = req.query.path;
     res.download(filePath);
+    res.cookie('myCookie', 'hello');
 
 })
 
@@ -680,9 +667,17 @@ app.get('/api/applicants', async (req, res) => {
 app.put('/api/subscribe', async (req, res) => {
     const email = req.body.email;
     const findedUser = await user.findOne({ email: email })
-    // console.log(findedUser)
+    console.log(findedUser)
 
     try {
+
+        if (findedUser?.subscribe == true) {
+            return res.status(400).send({
+                success: false,
+                message: ' already subscribed',
+
+            })
+        }
 
         if (findedUser && findedUser !== null) {
             console.log(' found')
@@ -742,6 +737,13 @@ app.put('/api/subscribe', async (req, res) => {
 
 
 app.get('/', (req, res) => {
+
+    res.cookie('token', 'token', {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+        secure: false,
+        sameSite: 'none',
+    });
     res.send('api running')
 })
 
