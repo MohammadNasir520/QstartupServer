@@ -23,9 +23,11 @@ const userRouter = require("./routes/userRouter")
 const careerRouter = require("./routes/careerRouter")
 const startUpRouter = require("./routes/startupRouter")
 const career = require("./models/careerModel")
+const message = require('./models/messageModel')
 
 // ejs setup
 const ejs = require('ejs');
+const { findOne } = require('./models/userModels');
 app.set('view engine', 'ejs');
 
 
@@ -735,6 +737,101 @@ app.put('/api/subscribe', async (req, res) => {
     }
 })
 
+app.put('/api/sendMessage', async (req, res) => {
+    console.log('hit messege')
+    console.log(req.body)
+    const sender = await user.findOne({ id: req.body.senderId })
+    const receiver = await user.findOne({ id: req.body.uniqueId })
+
+
+    const senderInfromationAndMessage = {
+        senderId: req.body.senderId,
+        senderImage: sender.data.imageurl,
+        message: req.body.message,
+        name: sender.username,
+
+    }
+
+
+    if (!sender || sender === null || undefined) {
+        return res.status(401).send({
+            success: false,
+            message: 'Unauthorized access',
+
+        })
+    }
+
+    if (!receiver || receiver === null || undefined) {
+
+        return res.status(400).send({
+            success: false,
+            message: 'invalid id',
+
+        })
+
+
+    }
+
+
+    const existingMessage = await message.findOne({ receiverId: req.body.uniqueId })
+    if (existingMessage !== null && existingMessage.receiverId) {
+
+        const updatedMessage = await message.findOneAndUpdate(
+            { receiverId: req.body.uniqueId },
+            { $push: { 'message': senderInfromationAndMessage } },
+            { upsert: true, new: true }
+        )
+        if (updatedMessage) {
+            res.status(200).send({
+                success: true,
+                message: 'message sent succussfully 2',
+
+            })
+        }
+        return console.log('not found', existingMessage)
+
+
+
+    } else {
+        console.log('create ')
+        const newMessage = new message(
+            {
+                receiverId: req.body.uniqueId,
+                message: [senderInfromationAndMessage]
+            }
+        )
+        const savedMessage = await newMessage.save()
+        if (savedMessage) {
+            res.status(200).send({
+                success: true,
+                message: 'message sent succussfully ',
+
+            })
+        }
+        // console.log('sender', sender)
+        // console.log('reciver', receiver)
+        // console.log('senderInfromationAndMessage', senderInfromationAndMessage)
+    }
+
+
+
+})
+
+
+// load message
+
+app.get('/api/getMessage', async (req, res) => {
+    console.log('id', req.query.uniqueId)
+    const messages = await message.findOne({ receiverId: req.query.uniqueId })
+    if (messages) {
+        res.status(200).send({
+            success: true,
+            data: messages,
+
+        })
+    }
+    console.log(messages)
+})
 
 app.get('/', (req, res) => {
 
@@ -744,7 +841,7 @@ app.get('/', (req, res) => {
         secure: false,
         sameSite: 'none',
     });
-    res.send('api running')
+    res.send('QstartUp api running')
 })
 
 

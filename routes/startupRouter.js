@@ -6,7 +6,7 @@ const user = require('../models/userModels')
 
 router.get("/admin/getAllStartUp", async (req, res) => {
     try {
-        console.log('startUp route hit')
+        // console.log('startUp route hit')
         // const _id = req?.query?._id;
         const role = req?.query?.role;
         if (!role) {
