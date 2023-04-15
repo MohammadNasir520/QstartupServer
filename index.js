@@ -58,7 +58,7 @@ app.use(startUpRouter)
 
 // cors bolck handle
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', 'https://deft-custard-35113f.netlify.app');
+    res.setHeader('Access-Control-Allow-Origin', 'https://deploy-preview-100--deft-custard-35113f.netlify.app');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
