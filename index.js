@@ -40,7 +40,7 @@ app.use(bodyParser.json());
 
 
 
-app.use(express.static('uploads'));
+// app.use(express.static('uploads'));
 
 
 // router middle ware
@@ -58,7 +58,7 @@ app.use(startUpRouter)
 
 // cors bolck handle
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', 'https://deploy-preview-100--deft-custard-35113f.netlify.app');
+    res.setHeader('Access-Control-Allow-Origin', 'https://deft-custard-35113f.netlify.app');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -122,7 +122,9 @@ const sendEMail = async (fromEmail, toEmail, subject, html) => {
 // puting the data of mentor and startup
 app.put('/registration', async (req, res) => {
 
+
     let email = '';
+    let data = req.body;
     if (req.body.email_StartUp) {
 
         email = req.body.email_StartUp;
@@ -130,6 +132,8 @@ app.put('/registration', async (req, res) => {
     else if (req.body.email_Mentor) {
 
         email = req.body.email_Mentor;
+        data = { ...req.body, "status": 'active' }
+
     }
     const role = req.body.role;
     const username = req.body.username;
@@ -144,6 +148,7 @@ app.put('/registration', async (req, res) => {
     else if (req.body.email_Mentor) {
 
         id = 'M' + ExistingUser._id;
+
     }
     console.log(req.body)
     console.log(role)
@@ -159,7 +164,8 @@ app.put('/registration', async (req, res) => {
                     email: email,
                     role: role,
                     username: username,
-                    data: req.body
+                    data: data
+
                 }
             },
             { upsert: true, new: true }
@@ -460,25 +466,7 @@ app.get('/downloadPdf', (req, res) => {
 
 })
 
-//  delete pdf ................................................
 
-// app.delete('/api/deletePdf', async (req, res) => {
-//     console.log('file delete hit')
-//     const resumePath = req.query.path
-//     fs.unlink(resumePath, (error) => {
-//         if (error) {
-//             console.log(error)
-//             res.status(500).send('Error deleting file');
-//             return;
-//         }
-//         // console.log(`${fileName} deleted successfully`);
-//         // res.send(`${fileName} deleted successfully`);
-
-
-//     })
-
-//     console.log(resumePath)
-// })
 
 app.delete('/api/deletePdf', async (req, res) => {
     console.log('file delete hit')
@@ -490,16 +478,6 @@ app.delete('/api/deletePdf', async (req, res) => {
 
 
         if (req.query.for == 'applicant') {
-            console.log('for hit')
-            // const deleteResume_cv = await career.updateOne(
-            //     // { resume: resumePath },
-            //     // { $unset: { resume: resumePath } },
-
-            //     { $or: [{ resume: resumePath }, { cv: resumePath }] },
-            //     { $unset: { resume: resumePath, cv: resumePath } },
-
-            //     { new: true }
-            // )
 
 
             if (!fs.existsSync(resumePath)) {
@@ -808,9 +786,7 @@ app.put('/api/sendMessage', async (req, res) => {
 
             })
         }
-        // console.log('sender', sender)
-        // console.log('reciver', receiver)
-        // console.log('senderInfromationAndMessage', senderInfromationAndMessage)
+
     }
 
 
@@ -831,6 +807,22 @@ app.get('/api/getMessage', async (req, res) => {
         })
     }
     console.log(messages)
+})
+
+app.put('/api/updateMentorStatus', async (req, res) => {
+    console.log('mentor status cliked', req.body)
+    const userFind = await user.find({ id: req.body.id })
+    console.log(userFind)
+
+
+    const updateMentorStatus = await user.findOneAndUpdate(
+        { id: req.body.id },
+        { $set: { 'data.status': req.body.status } },
+        { upsert: true, new: true }
+
+
+    )
+    console.log(updateMentorStatus)
 })
 
 app.get('/', (req, res) => {

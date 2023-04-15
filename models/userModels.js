@@ -34,6 +34,9 @@ const userSchema = new mongoose.Schema({
     },
     subscribe: {
         type: Boolean
+    },
+    status: {
+        type: String,
     }
 })
 module.exports = mongoose.model('users', userSchema)
