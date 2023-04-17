@@ -178,27 +178,33 @@ app.put('/registration', async (req, res) => {
             const from = process.env.Email
 
             const html = `
-            <p>
+            <p style="width: 400px">
 
-            Dear ${username},
+            Dear ${req.body.username}, <br>
 
 We are excited to welcome you to Q Startups! Thank you for joining our community of entrepreneurs and innovators.
+<br>
 
 As a Q Startups member, you will have access to a variety of resources, including mentorship, networking opportunities, and funding support. These resources are designed to help you succeed in your entrepreneurial journey and achieve your goals.
 
+<br>
 To log in to your Q Startups account, please visit our website at www.qstartups.com and use the following credentials:
+<br>
 
-Username: ${email}
-Password: ${ExistingUser.password}
+Username: ${email} <br>
+Password: ${ExistingUser.password}<br>
 UniqueId: ${id}
+<br>
 
 Please take a moment to verify that your account details are correct and let us know if you have any difficulty logging in.
-
+<br>
 If you have any questions or concerns, please do not hesitate to contact us at consult.pragya@gmail.com. We are here to help you every step of the way and ensure your success.
-
+<br>
 Thank you for choosing Q Startups! We look forward to working with you and supporting your entrepreneurial endeavors.
+<br>
+Best regards, 
 
-Best regards,
+<br>
 
 Q Startups
 
