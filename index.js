@@ -180,7 +180,7 @@ app.put('/registration', async (req, res) => {
             const html = `
             <p style="width: 400px">
 
-            Dear ${req.body.username}, <br>
+            Dear ${req.body.username || req.body.startupName}, <br>
 
 We are excited to welcome you to Q Startups! Thank you for joining our community of entrepreneurs and innovators.
 <br>
