@@ -58,7 +58,7 @@ app.use(startUpRouter)
 
 // cors bolck handle
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', 'https://deft-custard-35113f.netlify.app');
+    res.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:5502');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -174,14 +174,34 @@ app.put('/registration', async (req, res) => {
             res.json({ message: 'something going wrong please try again' });
         } else if (registered) {
 
-            const subject = "Registration successful"
+            const subject = "Welcome to Q Startups!"
             const from = process.env.Email
 
             const html = `
-            <a>Congratulaton for successfully registration <br>
-            at QStartUp as ${req.body.email_StartUp ? "startUp" : "mentor"} <br>
-            Your unique Id: ${id} <br>
-            please keep the Unique ID 
+            <p>
+
+            Dear ${username},
+
+We are excited to welcome you to Q Startups! Thank you for joining our community of entrepreneurs and innovators.
+
+As a Q Startups member, you will have access to a variety of resources, including mentorship, networking opportunities, and funding support. These resources are designed to help you succeed in your entrepreneurial journey and achieve your goals.
+
+To log in to your Q Startups account, please visit our website at www.qstartups.com and use the following credentials:
+
+Username: ${email}
+Password: ${ExistingUser.password}
+UniqueId: ${id}
+
+Please take a moment to verify that your account details are correct and let us know if you have any difficulty logging in.
+
+If you have any questions or concerns, please do not hesitate to contact us at consult.pragya@gmail.com. We are here to help you every step of the way and ensure your success.
+
+Thank you for choosing Q Startups! We look forward to working with you and supporting your entrepreneurial endeavors.
+
+Best regards,
+
+Q Startups
+
             </p> `
 
             const emailSend = await sendEMail(from, registered.email, subject, html)
